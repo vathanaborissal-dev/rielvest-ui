@@ -4420,3 +4420,8 @@ td {
 .review-factors dd { margin: 0; }
 .review-body a, .review-body button { text-decoration: underline; text-underline-offset: 3px; }
 @media (min-width: 760px) { .review-balance { grid-template-columns: 1fr 1fr; } }
+
+.ticket-detail { margin-top: 6px; }
+.ticket-detail summary { cursor: pointer; font-size: 10px; color: var(--ink-soft); }
+.ticket-detail summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.ticket-detail small { display: block; margin-top: 5px; }

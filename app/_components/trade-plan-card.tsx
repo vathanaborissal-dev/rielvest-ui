@@ -47,8 +47,8 @@ export function TradePlanCard({ plan }: { plan: TradePlan }) {
         <div className="plan-head-right">
           {plan.dailyRange ? (
             <div className="plan-range">
-              <span>Typical day</span>
-              <strong>±{formatNumber(plan.dailyRange.khr)} KHR</strong>
+              <span>Average true range</span>
+              <strong>{formatNumber(plan.dailyRange.khr)} KHR</strong>
               <em>{formatNumber(plan.dailyRange.percent, 1)}%</em>
             </div>
           ) : null}

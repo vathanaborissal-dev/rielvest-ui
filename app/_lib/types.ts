@@ -485,6 +485,9 @@ export interface DigestFreshness {
 }
 
 export interface OrderTicket {
+  distanceKhr?: number;
+  typicalRangeKhr?: number;
+  referenceBasis?: string;
   side: "buy" | "sell";
   label: string;
   targetPrice: number;

@@ -219,8 +219,14 @@ function NewsRow({ item }: { item: DigestNewsItem }) {
   );
 }
 
-function TicketCell({ ticket }: { ticket: OrderTicket | null }) {
-  if (!ticket) return null;
+function TicketCell({ ticket, side }: { ticket: OrderTicket | null; side: "buy" | "sell" }) {
+  if (!ticket) return (
+    <div className="ticket" data-side={side} data-reachable="false">
+      <span className="ticket-side">{side === "buy" ? "Buy reference" : "Sell reference"}</span>
+      <strong>No nearby reference</strong>
+      <small>Recent movement does not support a tick-valid reference price.</small>
+    </div>
+  );
 
   if (!ticket.reachableToday) {
     return (
@@ -234,14 +240,20 @@ function TicketCell({ ticket }: { ticket: OrderTicket | null }) {
 
   return (
     <div className="ticket" data-side={ticket.side} data-reachable="true">
-      <span className="ticket-side">{ticket.side === "buy" ? "Buy limit" : "Sell limit"}</span>
+      <span className="ticket-side">{ticket.side === "buy" ? "Buy limit reference" : "Sell limit reference"}</span>
       <strong>{formatNumber(ticket.limitPrice)}</strong>
-      <small>
-        {ticket.label.toLowerCase()}
-        {ticket.shares !== null ? ` · ${formatCompact(ticket.shares)} sh` : ""}
-        {ticket.valueKhr !== null ? ` · ${formatCompact(ticket.valueKhr)} riel` : ""}
-        {ticket.settlesOn ? ` · settles ${ticket.settlesOn}` : ""}
-      </small>
+      <small>{ticket.label.toLowerCase()}</small>
+      {ticket.distanceKhr !== undefined ? (
+        <small>{ticket.distanceKhr > 0 ? "+" : "−"}{formatNumber(Math.abs(ticket.distanceKhr))} KHR from close</small>
+      ) : null}
+      <details className="ticket-detail">
+        <summary>Basis and size</summary>
+        {ticket.typicalRangeKhr !== undefined ? <small>Recent daily range: {formatNumber(ticket.typicalRangeKhr)} KHR (20-session median true range).</small> : null}
+        {ticket.referenceBasis ? <small>{ticket.referenceBasis}</small> : null}
+        <small>Reference scenario only. Check the live bid and ask; an order may not fill.</small>
+        {ticket.shares !== null ? <small>Turnover-based size ceiling: {formatCompact(ticket.shares)} shares{ticket.valueKhr !== null ? ` · ${formatCompact(ticket.valueKhr)} KHR total` : ""}. Your budget may be smaller.</small> : null}
+        {ticket.settlesOn ? <small>Settles {ticket.settlesOn}</small> : null}
+      </details>
     </div>
   );
 }
@@ -311,7 +323,7 @@ function CandidateRow({ candidate }: { candidate: DigestCandidate }) {
         <strong>{formatNumber(candidate.levelPrice)}</strong>
         {candidate.otherPrice !== null ? (
           <small>
-            Other side: {candidate.otherLabel?.toLowerCase()} {formatNumber(candidate.otherPrice)}
+            Historical {candidate.otherLabel?.toLowerCase()}: {formatNumber(candidate.otherPrice)}
           </small>
         ) : null}
       </div>
@@ -332,11 +344,10 @@ function CandidateRow({ candidate }: { candidate: DigestCandidate }) {
           {candidate.tickSize}
         </p>
 
-        {/* The prices above are observations. These are orders: on the tick
-            grid, and checked against what today's band actually permits. */}
+        {/* Nearby scenarios, constrained by observed movement and exchange rules. */}
         <div className="ticket-row">
-          <TicketCell ticket={candidate.tickets.buy} />
-          <TicketCell ticket={candidate.tickets.sell} />
+          <TicketCell ticket={candidate.tickets.buy} side="buy" />
+          <TicketCell ticket={candidate.tickets.sell} side="sell" />
         </div>
       </div>
       <DecisionReview symbol={candidate.symbol} />
