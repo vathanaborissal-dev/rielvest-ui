@@ -4035,6 +4035,131 @@ td {
 
 .digest-quiet { color: var(--ink-faint); font-weight: 500; text-transform: none; letter-spacing: 0; }
 
+/* ── Trading session: what the exchange is doing to an order now ─────────── */
+
+.session-strip {
+  margin-top: 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  background: var(--surface-muted);
+}
+
+/* An open order book is the state that carries a deadline. */
+.session-strip[data-accepting="true"] {
+  border-color: color-mix(in srgb, var(--accent-strong) 40%, var(--line));
+  background: var(--accent-soft);
+}
+
+.session-strip-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.session-strip-head strong {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.session-countdown {
+  flex: 0 0 auto;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  padding: 2px 9px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.session-countdown[data-urgent="true"] {
+  border-color: color-mix(in srgb, var(--negative) 50%, transparent);
+  color: var(--negative);
+}
+
+.session-strip ul {
+  margin: 8px 0 0;
+  padding-left: 15px;
+}
+
+.session-strip li {
+  margin: 3px 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ── Order tickets ───────────────────────────────────────────────────────── */
+
+.ticket-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.ticket {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 7px 9px;
+}
+
+.ticket-side {
+  display: block;
+  color: var(--ink-faint);
+  font-size: 9px;
+  font-weight: 760;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ticket strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticket small {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-faint);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.ticket[data-side="buy"][data-reachable="true"] strong { color: var(--positive); }
+.ticket[data-side="sell"][data-reachable="true"] strong { color: var(--negative); }
+
+/* A level today's ±10% band cannot reach is not an order, and should not look
+   like one. */
+.ticket[data-reachable="false"] {
+  border-style: dashed;
+  background: var(--surface-muted);
+}
+
+.ticket[data-reachable="false"] strong {
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.digest-news-new {
+  flex: 0 0 auto;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--negative) 15%, transparent);
+  padding: 1px 6px;
+  color: var(--negative);
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 /* Shown only when the figures are not from a completed session today. */
 .digest-stale {
   display: flex;

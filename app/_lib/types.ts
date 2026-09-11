@@ -484,6 +484,30 @@ export interface DigestFreshness {
   staleNote: string | null;
 }
 
+export interface OrderTicket {
+  side: "buy" | "sell";
+  label: string;
+  targetPrice: number;
+  limitPrice: number | null;
+  tickSize: number;
+  bandFloor: number;
+  bandCeiling: number;
+  reachableToday: boolean;
+  unreachableNote: string | null;
+  tickAdjustment: number;
+  shares: number | null;
+  valueKhr: number | null;
+  settlesOn: string | null;
+}
+
+export interface DigestSession {
+  phase: string;
+  label: string;
+  acceptsOrders: boolean;
+  nextEvent: { label: string; at: string; minutesAway: number } | null;
+  guidance: string[];
+}
+
 export interface DigestCandidate {
   symbol: string;
   name: string;
@@ -503,6 +527,7 @@ export interface DigestCandidate {
   workableShares: number | null;
   workableValueKhr: number | null;
   turnoverKhr: number;
+  tickets: { buy: OrderTicket | null; sell: OrderTicket | null };
   score: number;
   scoreParts: { label: string; points: number }[];
 }
@@ -540,6 +565,7 @@ export interface DigestMover {
 }
 
 export interface DigestNewsItem {
+  sinceLastSession: boolean;
   symbol: string | null;
   name: string | null;
   title: string;
@@ -570,6 +596,7 @@ export interface MarketDigest {
   statusLabel: string;
   headline: { market: string; news: string | null; source: "model" | "engine" };
   freshness: DigestFreshness;
+  session: DigestSession;
   pulse: MarketPulse;
   movers: DigestMover[];
   news: DigestNewsItem[];

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SafeText } from "./data-ui";
+import { SessionCountdown } from "./session-countdown";
 import { StockAvatar } from "./stock-avatar";
 import { formatCompact, formatNumber, formatPercent, movementClass } from "../_lib/format";
 import type {
@@ -8,6 +9,7 @@ import type {
   DigestMover,
   DigestNewsItem,
   MarketDigest,
+  OrderTicket,
 } from "../_lib/types";
 
 /**
@@ -43,6 +45,20 @@ export function DigestCard({ digest }: { digest: MarketDigest }) {
           {digest.marketOpen ? "Open" : "Closed"}
         </span>
       </header>
+
+      {/* What the exchange is doing to an order right now. During the
+          pre-opening auction this is the most time-sensitive thing on the page. */}
+      <div className="session-strip" data-accepting={digest.session.acceptsOrders}>
+        <div className="session-strip-head">
+          <strong><SafeText>{digest.session.label}</SafeText></strong>
+          <SessionCountdown session={digest.session} />
+        </div>
+        <ul>
+          {digest.session.guidance.map((line) => (
+            <li key={line}><SafeText>{line}</SafeText></li>
+          ))}
+        </ul>
+      </div>
 
       {pulse.lines.length > 0 ? (
         <ul className="digest-pulse">
@@ -181,6 +197,7 @@ function NewsRow({ item }: { item: DigestNewsItem }) {
           {item.symbol}
         </span>
       ) : null}
+      {item.sinceLastSession ? <span className="digest-news-new">Not yet priced</span> : null}
       <span className="digest-news-title">
         <SafeText>{item.title}</SafeText>
       </span>
@@ -198,6 +215,33 @@ function NewsRow({ item }: { item: DigestNewsItem }) {
         body
       )}
     </li>
+  );
+}
+
+function TicketCell({ ticket }: { ticket: OrderTicket | null }) {
+  if (!ticket) return null;
+
+  if (!ticket.reachableToday) {
+    return (
+      <div className="ticket" data-side={ticket.side} data-reachable="false">
+        <span className="ticket-side">{ticket.side === "buy" ? "Buy" : "Sell"}</span>
+        <strong>Out of reach today</strong>
+        <small><SafeText>{ticket.unreachableNote ?? ""}</SafeText></small>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ticket" data-side={ticket.side} data-reachable="true">
+      <span className="ticket-side">{ticket.side === "buy" ? "Buy limit" : "Sell limit"}</span>
+      <strong>{formatNumber(ticket.limitPrice)}</strong>
+      <small>
+        {ticket.label.toLowerCase()}
+        {ticket.shares !== null ? ` · ${formatCompact(ticket.shares)} sh` : ""}
+        {ticket.valueKhr !== null ? ` · ${formatCompact(ticket.valueKhr)} riel` : ""}
+        {ticket.settlesOn ? ` · settles ${ticket.settlesOn}` : ""}
+      </small>
+    </div>
   );
 }
 
@@ -284,15 +328,15 @@ function CandidateRow({ candidate }: { candidate: DigestCandidate }) {
         ))}
         <p className="digest-constraints">
           Band {formatNumber(candidate.limitDown)}–{formatNumber(candidate.limitUp)} · tick{" "}
-          {candidate.tickSize} ·{" "}
-          {candidate.workableShares !== null
-            ? `~${formatCompact(candidate.workableShares)} shares${
-                candidate.workableValueKhr !== null
-                  ? ` (${formatCompact(candidate.workableValueKhr)} riel)`
-                  : ""
-              }`
-            : "size not estimable"}
+          {candidate.tickSize}
         </p>
+
+        {/* The prices above are observations. These are orders: on the tick
+            grid, and checked against what today's band actually permits. */}
+        <div className="ticket-row">
+          <TicketCell ticket={candidate.tickets.buy} />
+          <TicketCell ticket={candidate.tickets.sell} />
+        </div>
       </div>
     </li>
   );
