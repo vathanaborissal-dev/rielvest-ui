@@ -1336,7 +1336,9 @@ td {
 
 .quick-read-metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Cell count changes with what is actually known, so the columns follow the
+     content rather than leaving an empty box behind. */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1px;
   margin-top: 13px;
   overflow: hidden;
@@ -1408,6 +1410,42 @@ td {
   left: 0;
   color: var(--accent-strong);
   content: "✓";
+}
+
+.quick-read-more {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 11px;
+}
+
+.quick-read-more > summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.quick-read-more > summary::-webkit-details-marker { display: none; }
+.quick-read-more > summary:hover { color: var(--ink); }
+
+.quick-read-more p {
+  margin: 11px 0 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.quick-read-more ul {
+  margin: 9px 0 0;
+  padding-left: 16px;
+}
+
+.quick-read-more li {
+  margin: 3px 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .quick-read-disclaimer {
@@ -1683,13 +1721,31 @@ td {
 }
 
 .analysis-narrative {
+  margin-top: 25px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.analysis-narrative > summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.analysis-narrative > summary::-webkit-details-marker { display: none; }
+.analysis-narrative > summary:hover { color: var(--ink); }
+
+.analysis-narrative[open] > summary { margin-bottom: 14px; }
+
+.analysis-narrative[open] {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 13px 24px;
-  margin-top: 25px;
-  border-top: 1px solid var(--line);
-  padding-top: 20px;
 }
+
+.analysis-narrative[open] > summary { grid-column: 1 / -1; }
 
 .analysis-narrative p {
   margin: 0;
@@ -1763,14 +1819,45 @@ td {
   text-transform: capitalize;
 }
 
-.data-gap {
-  margin: 16px 0 0;
+.data-gap-flag {
+  margin: 14px 0 0;
   border-top: 1px solid var(--line);
-  padding-top: 11px;
+  padding-top: 10px;
   color: var(--ink-faint);
   font-size: 9px;
-  line-height: 1.45;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
+
+/* Cambodia publishes no filed statements, so most categories report the same
+   gap. It is stated once here instead of on every card. */
+.data-gap-summary {
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 13px;
+}
+
+.data-gap-summary > summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.data-gap-summary > summary::-webkit-details-marker { display: none; }
+.data-gap-summary > summary:hover { color: var(--ink); }
+.data-gap-summary[open] > summary { margin-bottom: 10px; }
+
+.data-gap-summary p {
+  margin: 0 0 6px;
+  color: var(--ink-faint);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.data-gap-summary p:last-child { margin-bottom: 0; }
 
 .finding-grid {
   display: grid;

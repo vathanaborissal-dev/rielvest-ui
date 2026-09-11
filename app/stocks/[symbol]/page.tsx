@@ -97,8 +97,6 @@ export default async function CompanyPage({ params }: PageProps<"/stocks/[symbol
                 initialQuickRead={quickReadResult.data}
               />
               <div className="quote-metrics">
-                <MetricCell label="Session high" value={formatKhr(latest?.high)} />
-                <MetricCell label="Session low" value={formatKhr(latest?.low)} />
                 <MetricCell label="Volume" value={formatCompact(latest?.volume)} />
                 <MetricCell label="Trading value" value={formatKhr(latest?.value, true)} />
                 <MetricCell
@@ -196,6 +194,8 @@ function AnalysisSection({ analysis, error }: { analysis: StockAnalysis | null; 
     return <DataNotice title="Analysis is not available">{error ?? "The analysis engine returned no result."}</DataNotice>;
   }
 
+  const uniqueGaps = [...new Set(analysis.categories.flatMap((category) => category.dataGaps))];
+
   return (
     <section className="analysis-section">
       <div className="analysis-overview">
@@ -214,17 +214,20 @@ function AnalysisSection({ analysis, error }: { analysis: StockAnalysis | null; 
         </div>
       </div>
 
+      {/* Every sentence here restates a figure from the tables below, so it
+          reads as repetition rather than explanation when left open. */}
       {analysis.narrative.length ? (
-        <div className="analysis-narrative">
+        <details className="analysis-narrative">
+          <summary>Read this in sentences</summary>
           {analysis.narrative.map((line, index) => <p key={index}><SafeText>{line}</SafeText></p>)}
-        </div>
+        </details>
       ) : null}
 
       <div className="category-grid">
         {analysis.categories.map((category) => (
           <article className="category-card" key={category.key}>
             <div className="category-title">
-              <div><h3>{category.label}</h3><p><SafeText>{category.question}</SafeText></p></div>
+              <h3 title={category.question}>{category.label}</h3>
               <AssessmentTag value={category.assessment} />
             </div>
             <div className="category-metrics">
@@ -236,14 +239,25 @@ function AnalysisSection({ analysis, error }: { analysis: StockAnalysis | null; 
                 </div>
               ))}
             </div>
-            {category.dataGaps.length ? <p className="data-gap">Data gap: {cleanCopy(category.dataGaps[0]!)}</p> : null}
+            {category.dataGaps.length ? (
+              <p className="data-gap-flag" title={cleanCopy(category.dataGaps[0]!)}>Data gap</p>
+            ) : null}
           </article>
         ))}
       </div>
 
+      {uniqueGaps.length ? (
+        <details className="data-gap-summary">
+          <summary>
+            {uniqueGaps.length} thing{uniqueGaps.length === 1 ? "" : "s"} this analysis cannot assess
+          </summary>
+          {uniqueGaps.map((gap) => <p key={gap}>{cleanCopy(gap)}</p>)}
+        </details>
+      ) : null}
+
       <div className="finding-grid">
-        <FindingList title="Risks and cautions" findings={analysis.risks} empty="No risk finding could be formed from current data." />
-        <FindingList title="Positive signals" findings={analysis.opportunities} empty="No positive finding could be formed from current data." />
+        <FindingList title="Risks and cautions" findings={analysis.risks} limit={3} empty="No risk finding could be formed from current data." />
+        <FindingList title="Positive signals" findings={analysis.opportunities} limit={2} empty="No positive finding could be formed from current data." />
       </div>
       <details className="methodology analysis-methodology">
         <summary>Read the scoring methodology</summary>
@@ -253,11 +267,11 @@ function AnalysisSection({ analysis, error }: { analysis: StockAnalysis | null; 
   );
 }
 
-function FindingList({ title, findings, empty }: { title: string; findings: AnalysisFinding[]; empty: string }) {
+function FindingList({ title, findings, empty, limit = 4 }: { title: string; findings: AnalysisFinding[]; empty: string; limit?: number }) {
   return (
     <section>
       <h3>{title}</h3>
-      {findings.length ? findings.slice(0, 4).map((finding, index) => (
+      {findings.length ? findings.slice(0, limit).map((finding, index) => (
         <div className="finding" key={index}>
           <AssessmentTag value={finding.assessment} />
           <p><SafeText>{finding.statement}</SafeText></p>

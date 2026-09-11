@@ -191,13 +191,13 @@ export function StockPriceChart({
   const liveDescription = liveTrade
     ? `${formatDate(new Date(liveTrade.timestamp * 1000).toISOString(), { hour: "2-digit", minute: "2-digit", second: "2-digit" })} · ${formatCompact(liveTrade.quantity)} shares in the latest execution`
     : marketStatus === null
-      ? "Showing the last recorded close. Checking whether the exchange is trading."
+      ? "Showing the last recorded close"
       : !marketStatus.isOpen
-        ? `${marketStatus.label}. Showing the last recorded close. ${marketStatus.sessionHours}`
+        ? `${marketStatus.label} · showing the last recorded close`
         : streamStatus === "connected"
-          ? "Connected to the CSX live-trade stream. Waiting for the next execution."
+          ? "Live stream connected · waiting for the next execution"
           : streamStatus === "connecting"
-            ? "Connecting to the CSX live-trade stream."
+            ? "Connecting to the live stream"
             : "Live stream unavailable. The 30-second price-bar refresh remains active.";
 
   const chooseInterval = (nextInterval: ChartInterval) => {
@@ -326,35 +326,26 @@ function TodayQuickRead({ reading }: { reading: StockQuickRead }) {
         <strong>{reading.signalLabel}</strong>
       </div>
 
-      <p className="quick-read-explanation">{reading.explanation}</p>
-
+      {/* The last trade is already the page's hero figure and the session
+          high/low are inside the range, so neither is repeated here. */}
       <div className="quick-read-metrics">
-        <div><span>Last trade</span><strong>{formatKhr(reading.session.last)}</strong></div>
         <div><span>Today&apos;s average (VWAP)</span><strong>{formatKhr(reading.session.vwap)}</strong></div>
-        <div><span>Session range</span><strong>{formatKhr(reading.session.low)} - {formatKhr(reading.session.high)}</strong></div>
+        <div><span>Session range</span><strong>{formatKhr(reading.session.low)} – {formatKhr(reading.session.high)}</strong></div>
         <div><span>Trading activity</span><strong>{volumeComparison}</strong></div>
       </div>
 
-      <div className="quick-read-lower">
-        <div>
-          <span className="quick-read-subtitle">Price references, not orders</span>
-          <div className="price-reference-row">
-            {reading.priceReferences.map((reference) => (
-              <div key={reference.key} title={reference.note}>
-                <span>{reference.label}</span>
-                <strong>{formatKhr(reference.price)}</strong>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="quick-read-check">
-          <span className="quick-read-subtitle">Before you place an order</span>
-          <p>{reading.checklist[0]}</p>
-          <p>{reading.checklist[1]}</p>
-        </div>
-      </div>
-
-      <p className="quick-read-disclaimer">{reading.disclaimer} Last trade and VWAP are not the live bid or ask.</p>
+      {/* The headline above already carries the warning. The reasoning behind
+          it, and the order checklist, are available but not in the way. */}
+      <details className="quick-read-more">
+        <summary>Why, and what to check before ordering</summary>
+        <p>{reading.explanation}</p>
+        <ul>
+          {reading.checklist.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+        <p className="quick-read-disclaimer">
+          {reading.disclaimer} Last trade and VWAP are not the live bid or ask.
+        </p>
+      </details>
     </section>
   );
 }
