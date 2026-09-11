@@ -46,8 +46,11 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setAppearance(readStored());
-    setReady(true);
+    const frame = requestAnimationFrame(() => {
+      setAppearance(readStored());
+      setReady(true);
+    });
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   // Reflect state onto <html> so the CSS, and anything reading the DOM, agree.

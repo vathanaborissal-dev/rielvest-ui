@@ -17,9 +17,9 @@ export function SessionCountdown({ session }: { session: DigestSession }) {
 
   useEffect(() => {
     if (target === null) return;
-    setNow(Date.now());
+    const initial = setTimeout(() => setNow(Date.now()), 0);
     const timer = setInterval(() => setNow(Date.now()), 20_000);
-    return () => clearInterval(timer);
+    return () => { clearTimeout(initial); clearInterval(timer); };
   }, [target]);
 
   if (!session.nextEvent) return null;

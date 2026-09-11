@@ -4401,3 +4401,22 @@ td {
   .digest-level,
   .digest-notes { grid-column: 1 / -1; }
 }
+
+/* Decision support stays behind one disclosure until the reader asks. */
+.decision-review { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; min-width: 0; }
+.digest-row > .decision-review { grid-column: 1 / -1; margin-top: 0; }
+.decision-review > summary, .review-evidence > summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ink); }
+.decision-review summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.review-body { padding: 12px 0 4px; font-size: 12px; line-height: 1.65; color: var(--ink-soft); overflow-wrap: anywhere; }
+.review-body p { margin: 6px 0; }
+.review-heading strong { display: block; color: var(--ink); font-size: 14px; }
+.review-heading > span, .review-meta { font-size: 11px; color: var(--ink-soft); }
+.review-balance { display: grid; gap: 12px; margin-top: 12px; }
+.review-body h4 { margin: 8px 0 4px; color: var(--ink); font-size: 12px; }
+.review-next { padding: 8px 10px; border-left: 2px solid var(--line-strong); }
+.review-evidence { margin-top: 12px; }
+.review-factors { display: grid; gap: 5px; margin: 12px 0; }
+.review-factors > div { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.review-factors dd { margin: 0; }
+.review-body a, .review-body button { text-decoration: underline; text-underline-offset: 3px; }
+@media (min-width: 760px) { .review-balance { grid-template-columns: 1fr 1fr; } }

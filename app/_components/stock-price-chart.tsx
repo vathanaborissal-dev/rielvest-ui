@@ -109,13 +109,13 @@ export function StockPriceChart({
   }, [symbol]);
 
   useEffect(() => {
-    void loadMarketStatus();
+    const initial = window.setTimeout(() => void loadMarketStatus(), 0);
     const timer = window.setInterval(() => {
       void load(interval, range, true);
       void loadQuickRead();
       void loadMarketStatus();
     }, 30_000);
-    return () => window.clearInterval(timer);
+    return () => { window.clearTimeout(initial); window.clearInterval(timer); };
   }, [interval, load, loadMarketStatus, loadQuickRead, range]);
 
   const streamWanted = marketStatus === null || marketStatus.phase === "open" || marketStatus.phase === "pre_open";
@@ -123,10 +123,7 @@ export function StockPriceChart({
   useEffect(() => {
     // Holding a socket open overnight achieves nothing: the exchange sends no
     // trades outside the session.
-    if (!streamWanted) {
-      setStreamStatus("offline");
-      return;
-    }
+    if (!streamWanted) return;
 
     const socket = new WebSocket(CSX_STREAM_URL);
     socket.addEventListener("open", () => {

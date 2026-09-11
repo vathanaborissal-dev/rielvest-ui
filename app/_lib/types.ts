@@ -607,3 +607,19 @@ export interface MarketDigest {
   emptyReason: string | null;
   caution: string;
 }
+
+export interface ReviewNews { title: string; date: string; url: string | null }
+export interface DecisionReview {
+  symbol: string;
+  asOf: string | null;
+  stance: 'research' | 'wait' | 'insufficient_data';
+  headline: string;
+  coverage: number;
+  factors: { label: string; assessment: Assessment; score: number | null }[];
+  strengths: string[];
+  cautions: string[];
+  nextCheck: string;
+  gaps: string[];
+  news: ReviewNews[];
+  summary: { lines: string[]; source: 'model' | 'engine'; model: string | null };
+}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DecisionReview } from "./decision-review";
 import { SafeText } from "./data-ui";
 import { SessionCountdown } from "./session-countdown";
 import { StockAvatar } from "./stock-avatar";
@@ -338,6 +339,7 @@ function CandidateRow({ candidate }: { candidate: DigestCandidate }) {
           <TicketCell ticket={candidate.tickets.sell} />
         </div>
       </div>
+      <DecisionReview symbol={candidate.symbol} />
     </li>
   );
 }

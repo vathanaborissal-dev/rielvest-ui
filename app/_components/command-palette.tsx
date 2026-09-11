@@ -61,11 +61,15 @@ export function CommandPalette() {
 
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
+        setQuery("");
+        setActive(0);
         setOpen((value) => !value);
         return;
       }
       if (event.key === "/" && !typing && !open) {
         event.preventDefault();
+        setQuery("");
+        setActive(0);
         setOpen(true);
       }
     };
@@ -95,10 +99,9 @@ export function CommandPalette() {
 
   useEffect(() => {
     if (open) {
-      setQuery("");
-      setActive(0);
       // Focus after paint so the dialog is in the accessibility tree first.
-      requestAnimationFrame(() => inputRef.current?.focus());
+      const frame = requestAnimationFrame(() => inputRef.current?.focus());
+      return () => cancelAnimationFrame(frame);
     }
   }, [open]);
 
@@ -224,9 +227,8 @@ export function CommandPalette() {
   // A flat list mirrors what the arrow keys walk through.
   const flat = useMemo(() => grouped.flatMap((group) => group.items), [grouped]);
 
-  useEffect(() => {
-    if (active >= flat.length) setActive(0);
-  }, [active, flat.length]);
+  // Clamp during render so keyboard selection always matches the visible list.
+  if (active >= flat.length && active !== 0) setActive(0);
 
   useEffect(() => {
     listRef.current

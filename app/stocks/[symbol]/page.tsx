@@ -1,3 +1,4 @@
+import { DecisionReview } from "../../_components/decision-review";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "../../_components/app-shell";
@@ -135,6 +136,7 @@ export default async function CompanyPage({ params }: PageProps<"/stocks/[symbol
             </aside>
           </section>
 
+          <DecisionReview symbol={bundle.company.symbol} />
           <AnalysisSection analysis={analysis} error={analysisResult.error} />
 
           <section className="dividend-panel">

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { useAppearance } from "./appearance-provider";
 import { AppearanceMenu } from "./appearance-menu";
@@ -28,15 +28,13 @@ const plannedRoutes: Array<{ labelKey: TranslationKey; key: ActiveRoute; icon: I
   { labelKey: "nav.insights", key: "insights", icon: InsightIcon },
 ];
 
+const subscribePlatform = () => () => {};
+const platformShortcut = () => /Mac|iPhone|iPad/.test(navigator.platform ?? navigator.userAgent) ? "⌘ K" : "Ctrl K";
+const serverShortcut = () => "Ctrl K";
+
 export function AppShell({ children, active }: { children: ReactNode; active: ActiveRoute }) {
   const { t, sidebarCollapsed, toggleSidebar, setMode, mode } = useAppearance();
-  const [shortcutHint, setShortcutHint] = useState("Ctrl K");
-
-  // The modifier shown has to match the keyboard in front of the reader.
-  useEffect(() => {
-    const isApple = /Mac|iPhone|iPad/.test(navigator.platform ?? navigator.userAgent);
-    setShortcutHint(isApple ? "⌘ K" : "Ctrl K");
-  }, []);
+  const shortcutHint = useSyncExternalStore(subscribePlatform, platformShortcut, serverShortcut);
 
   // Shell-level shortcuts. The palette owns Cmd+K itself.
   useEffect(() => {
