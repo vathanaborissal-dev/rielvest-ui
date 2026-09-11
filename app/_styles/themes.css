@@ -1,0 +1,402 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Theme presets
+   ══════════════════════════════════════════════════════════════════════════
+   Four presets, each with a light and a dark palette, selected by
+   `data-theme-preset` on <html> and toggled light/dark with the `.dark` class.
+
+   The palettes use the shadcn token names so they can be swapped wholesale.
+   Below them, a bridge maps RielVest's own semantic names onto those tokens,
+   which is what lets every existing page re-theme without being rewritten.
+
+   Market colours are the deliberate exception: up and down are defined per
+   preset rather than taken from the decorative chart palette, because a rising
+   price must never render in the same hue as a falling one just because a
+   preset happens to be yellow-and-blue.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Default ─────────────────────────────────────────────────────────────── */
+
+:root,
+:root[data-theme-preset="default"] {
+  --radius: 0.625rem;
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #171717;
+  --muted-bg: #f5f5f5;
+  --muted-foreground: #737373;
+  --accent-bg: #f5f5f5;
+  --accent-foreground: #171717;
+  --destructive: #e40014;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #a1a1a1;
+  --chart-1: #d4d4d4;
+  --chart-2: #737373;
+  --chart-3: #525252;
+  --chart-4: #404040;
+  --chart-5: #262626;
+  --sidebar: #fafafa;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #171717;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: #171717;
+  --sidebar-border: #e5e5e5;
+  --up: #0f7a4d;
+  --down: #c72a30;
+  --warn: #9a6b12;
+}
+
+.dark,
+.dark[data-theme-preset="default"] {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #171717;
+  --card-foreground: #fafafa;
+  --popover: #171717;
+  --popover-foreground: #fafafa;
+  --primary: #e5e5e5;
+  --primary-foreground: #171717;
+  --secondary: #262626;
+  --secondary-foreground: #fafafa;
+  --muted-bg: #262626;
+  --muted-foreground: #a1a1a1;
+  --accent-bg: #262626;
+  --accent-foreground: #fafafa;
+  --destructive: #ff6568;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #737373;
+  --sidebar: #171717;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #e5e5e5;
+  --sidebar-primary-foreground: #171717;
+  --sidebar-accent: #262626;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --up: #4ec38a;
+  --down: #ff7b7e;
+  --warn: #e0b95c;
+}
+
+/* ── Brutalist ───────────────────────────────────────────────────────────── */
+
+:root[data-theme-preset="brutalist"] {
+  --radius: 0px;
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #ff3333;
+  --primary-foreground: #ffffff;
+  --secondary: #ffff02;
+  --secondary-foreground: #000000;
+  --muted-bg: #f0f0f0;
+  --muted-foreground: #333333;
+  --accent-bg: #0066ff;
+  --accent-foreground: #ffffff;
+  --destructive: #000000;
+  --border: #000000;
+  --input: #000000;
+  --ring: #ff3333;
+  --chart-1: #ff3333;
+  --chart-2: #ffff02;
+  --chart-3: #0066ff;
+  --chart-4: #00cc00;
+  --chart-5: #cc00cc;
+  --sidebar: #f0f0f0;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #ff3333;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0066ff;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #000000;
+  --up: #007a1f;
+  --down: #d10000;
+  --warn: #8a6d00;
+  --shadow-flat: 4px 4px 0 0 #000000;
+}
+
+.dark[data-theme-preset="brutalist"] {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #333333;
+  --card-foreground: #ffffff;
+  --popover: #333333;
+  --popover-foreground: #ffffff;
+  --primary: #ff6666;
+  --primary-foreground: #000000;
+  --secondary: #ffff34;
+  --secondary-foreground: #000000;
+  --muted-bg: #333333;
+  --muted-foreground: #cccccc;
+  --accent-bg: #3399ff;
+  --accent-foreground: #000000;
+  --destructive: #ffffff;
+  --border: #ffffff;
+  --input: #ffffff;
+  --ring: #ff6666;
+  --chart-1: #ff6666;
+  --chart-2: #ffff34;
+  --chart-3: #3399ff;
+  --chart-4: #33cc33;
+  --chart-5: #cc33cc;
+  --sidebar: #000000;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ff6666;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #3399ff;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #ffffff;
+  --up: #33cc33;
+  --down: #ff6666;
+  --warn: #ffff34;
+  --shadow-flat: 4px 4px 0 0 #ffffff;
+}
+
+/* ── Soft Pop ────────────────────────────────────────────────────────────── */
+
+:root[data-theme-preset="soft-pop"] {
+  --radius: 1rem;
+  --background: #f7f9f3;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #14b8a6;
+  --secondary-foreground: #ffffff;
+  --muted-bg: #f0f0f0;
+  --muted-foreground: #333333;
+  --accent-bg: #f59e0b;
+  --accent-foreground: #000000;
+  --destructive: #ef4444;
+  --border: #000000;
+  --input: #737373;
+  --ring: #a5b4fc;
+  --chart-1: #4f46e5;
+  --chart-2: #14b8a6;
+  --chart-3: #f59e0b;
+  --chart-4: #ec4899;
+  --chart-5: #22c55e;
+  --sidebar: #f7f9f3;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #4f46e5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f59e0b;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #000000;
+  --up: #12813f;
+  --down: #d32b2b;
+  --warn: #a6690a;
+}
+
+.dark[data-theme-preset="soft-pop"] {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #1a212b;
+  --card-foreground: #ffffff;
+  --popover: #1a212b;
+  --popover-foreground: #ffffff;
+  --primary: #818cf8;
+  --primary-foreground: #000000;
+  --secondary: #2dd4bf;
+  --secondary-foreground: #000000;
+  --muted-bg: #333333;
+  --muted-foreground: #cccccc;
+  --accent-bg: #fcd34d;
+  --accent-foreground: #000000;
+  --destructive: #f87171;
+  --border: #545454;
+  --input: #545454;
+  --ring: #818cf8;
+  --chart-1: #818cf8;
+  --chart-2: #2dd4bf;
+  --chart-3: #fcd34d;
+  --chart-4: #f472b6;
+  --chart-5: #4ade80;
+  --sidebar: #000000;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #818cf8;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #fcd34d;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #545454;
+  --up: #4ade80;
+  --down: #f87171;
+  --warn: #fcd34d;
+}
+
+/* ── Tangerine ───────────────────────────────────────────────────────────── */
+
+:root[data-theme-preset="tangerine"] {
+  --radius: 0.625rem;
+  --background: #ebebeb;
+  --foreground: #333333;
+  --card: #ffffff;
+  --card-foreground: #333333;
+  --popover: #ffffff;
+  --popover-foreground: #333333;
+  --primary: #df5e3a;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #4b5666;
+  --muted-bg: #f8f8f8;
+  --muted-foreground: #6c727e;
+  --accent-bg: #d7e3ee;
+  --accent-foreground: #1e3a8b;
+  --destructive: #f14444;
+  --border: #d9dfe4;
+  --input: #f5f5f5;
+  --ring: #df5e3a;
+  --chart-1: #88a8c9;
+  --chart-2: #eea693;
+  --chart-3: #597da9;
+  --chart-4: #476491;
+  --chart-5: #304a83;
+  --sidebar: #dedede;
+  --sidebar-foreground: #333333;
+  --sidebar-primary: #df5e3a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #d7e3ee;
+  --sidebar-accent-foreground: #1e3a8b;
+  --sidebar-border: #e4e8ef;
+  --up: #16794f;
+  --down: #cf3232;
+  --warn: #9c6a15;
+}
+
+.dark[data-theme-preset="tangerine"] {
+  --background: #1c2433;
+  --foreground: #e4e4e4;
+  --card: #2a3040;
+  --card-foreground: #e4e4e4;
+  --popover: #272b36;
+  --popover-foreground: #e4e4e4;
+  --primary: #df5e3a;
+  --primary-foreground: #ffffff;
+  --secondary: #293040;
+  --secondary-foreground: #e4e4e4;
+  --muted-bg: #293040;
+  --muted-foreground: #a4a4a4;
+  --accent-bg: #2a3657;
+  --accent-foreground: #bddaff;
+  --destructive: #f14444;
+  --border: #3c4253;
+  --input: #3c4253;
+  --ring: #df5e3a;
+  --chart-1: #88a8c9;
+  --chart-2: #e7a08e;
+  --chart-3: #597da9;
+  --chart-4: #476491;
+  --chart-5: #304a83;
+  --sidebar: #2a3040;
+  --sidebar-foreground: #e4e4e4;
+  --sidebar-primary: #df5e3a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2a3657;
+  --sidebar-accent-foreground: #bddaff;
+  --sidebar-border: #3c4253;
+  --up: #5fc292;
+  --down: #ff8080;
+  --warn: #e0b95c;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Bridge: RielVest's semantic names onto the preset tokens.
+
+   Every page written before the theme system used these names directly, so
+   mapping them here re-themes the whole product without touching page CSS.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --surface: var(--card);
+  --surface-strong: var(--popover);
+  --surface-muted: var(--muted-bg);
+
+  --text: var(--foreground);
+  --ink: var(--foreground);
+  --text-soft: var(--muted-foreground);
+  --ink-soft: var(--muted-foreground);
+  /* Faint text still has to clear contrast, so it is mixed toward the page
+     rather than set to an arbitrary grey that some presets would wash out. */
+  --muted: color-mix(in srgb, var(--muted-foreground) 82%, var(--background));
+  --ink-faint: var(--muted);
+
+  --line: var(--border);
+  --line-strong: color-mix(in srgb, var(--border) 60%, var(--foreground) 22%);
+
+  --accent: var(--primary);
+  --accent-strong: color-mix(in srgb, var(--primary) 88%, var(--foreground));
+  --accent-soft: color-mix(in srgb, var(--primary) 14%, var(--background));
+
+  --positive: var(--up);
+  --negative: var(--down);
+  --negative-soft: color-mix(in srgb, var(--down) 16%, var(--background));
+  --warning: var(--warn);
+  --warning-soft: color-mix(in srgb, var(--warn) 18%, var(--background));
+
+  --chart-fill: color-mix(in srgb, var(--primary) 14%, transparent);
+  --shadow: var(--shadow-flat, 0 18px 50px rgba(0, 0, 0, 0.10));
+}
+
+/* Brutalist is defined by hard edges and offset shadows rather than depth. */
+:root[data-theme-preset="brutalist"] {
+  --line-strong: var(--border);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Fonts
+
+   `data-font-sans` and `data-font-mono` on <html> pick the family. A Khmer
+   face is appended to every stack: none of the Latin families carry Khmer
+   glyphs, so this is what keeps Khmer copy correctly shaped whichever Latin
+   font is selected.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --khmer-stack: var(--font-khmer), var(--font-khmer-alt), "Khmer OS", sans-serif;
+  --font-sans: var(--font-geist), var(--khmer-stack);
+  --font-mono: var(--font-geist-mono), var(--khmer-stack), monospace;
+}
+
+:root[data-font-sans="inter"] { --font-sans: var(--font-inter), var(--khmer-stack); }
+:root[data-font-sans="outfit"] { --font-sans: var(--font-outfit), var(--khmer-stack); }
+:root[data-font-sans="dm-sans"] { --font-sans: var(--font-dm-sans), var(--khmer-stack); }
+:root[data-font-sans="nunito-sans"] { --font-sans: var(--font-nunito-sans), var(--khmer-stack); }
+:root[data-font-sans="figtree"] { --font-sans: var(--font-figtree), var(--khmer-stack); }
+:root[data-font-sans="raleway"] { --font-sans: var(--font-raleway), var(--khmer-stack); }
+:root[data-font-sans="public-sans"] { --font-sans: var(--font-public-sans), var(--khmer-stack); }
+:root[data-font-sans="noto-sans"] { --font-sans: var(--font-noto-sans), var(--khmer-stack); }
+:root[data-font-sans="roboto"] { --font-sans: var(--font-roboto), var(--khmer-stack); }
+
+:root[data-font-mono="jetbrains-mono"] {
+  --font-mono: var(--font-jetbrains-mono), var(--khmer-stack), monospace;
+}
+
+/* Khmer script needs more vertical room than Latin at the same size, or the
+   subscript consonants and vowel signs collide with the line above. */
+:root[lang="km"] {
+  --khmer-line-height: 1.85;
+}
+
+:root[lang="km"] body {
+  line-height: var(--khmer-line-height);
+}
+
+:root[lang="km"] h1,
+:root[lang="km"] h2,
+:root[lang="km"] h3 {
+  line-height: 1.5;
+}
