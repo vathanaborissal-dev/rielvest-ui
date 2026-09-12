@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { AppShell, PageHeader } from "../_components/app-shell";
 import { AssessmentTag, DataNotice, SafeText, SourceFooter } from "../_components/data-ui";
+import { ContextPanel } from "../_components/context-panel";
 import { DigestCard } from "../_components/digest-card";
-import { getBriefing, getDigest } from "../_lib/api";
+import { getBriefing, getDigest, getMarketContext } from "../_lib/api";
 import { formatCompact, formatDate, formatNumber, formatPercent, movementClass } from "../_lib/format";
 import type { BriefingSignal, SignalKind } from "../_lib/types";
 
@@ -126,9 +127,14 @@ function FocusCard({ signal }: { signal: BriefingSignal }) {
 }
 
 export default async function BriefingPage() {
-  const [result, digestResult] = await Promise.all([getBriefing(), getDigest()]);
+  const [result, digestResult, contextResult] = await Promise.all([
+    getBriefing(),
+    getDigest(),
+    getMarketContext(),
+  ]);
   const brief = result.data;
   const digest = digestResult.data;
+  const context = contextResult.data;
 
   if (!brief) {
     return (
@@ -163,6 +169,7 @@ export default async function BriefingPage() {
       />
 
       {digest ? <DigestCard digest={digest} /> : null}
+      {context ? <ContextPanel context={context} /> : null}
 
       {/* Everything below is the evidence behind the card above. It is
           collapsed because a reader checking in briefly has already had their

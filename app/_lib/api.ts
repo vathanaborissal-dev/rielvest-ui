@@ -13,6 +13,7 @@ import type {
   TradePlan,
   ChartInterval,
   ChartRange,
+  MarketContext,
 } from "./types";
 
 const API_BASE = (process.env.RIELVEST_API_URL ?? "http://localhost:4000/api").replace(/\/$/, "");
@@ -131,6 +132,16 @@ export async function getTradePlan(symbol: string) {
 /** The 30-second answer: what happened, any news, and which prices matter. */
 export function getDigest() {
   return getJson<MarketDigest>("/market/digest", REVALIDATE.price);
+}
+
+/**
+ * What moved while Phnom Penh was shut.
+ *
+ * Read live from third parties on each request and never stored, so it is
+ * cached briefly here rather than revalidated on the price cadence.
+ */
+export function getMarketContext() {
+  return getJson<MarketContext>("/market/context", 120);
 }
 
 /** The pre-session brief: what needs a decision before the bell. */

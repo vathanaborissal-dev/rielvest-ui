@@ -626,3 +626,34 @@ export interface DecisionReview {
   news: ReviewNews[];
   summary: { lines: string[]; source: 'model' | 'engine'; model: string | null };
 }
+
+/** Live, borrowed context — fetched on request and never stored by RielVest. */
+export interface LiveQuote {
+  key: string;
+  label: string;
+  note: string | null;
+  isProxy: boolean;
+  price: number | null;
+  previousClose: number | null;
+  changePercent: number | null;
+  currency: string | null;
+  asOf: string | null;
+  available: boolean;
+  unavailableReason: string | null;
+}
+
+export interface LiveHeadline {
+  title: string;
+  url: string;
+  publishedAt: string | null;
+}
+
+export interface MarketContext {
+  fetchedAt: string;
+  region: LiveQuote[];
+  benchmarks: LiveQuote[];
+  headlines: LiveHeadline[];
+  summary: string | null;
+  sources: Array<{ label: string; url: string; note: string }>;
+  storage: string;
+}
