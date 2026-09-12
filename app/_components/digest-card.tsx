@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DecisionReview } from "./decision-review";
 import { SafeText } from "./data-ui";
+import { RangeBar, Sparkline, type RangeMark } from "./spark";
 import { SessionCountdown } from "./session-countdown";
 import { StockAvatar } from "./stock-avatar";
 import { formatCompact, formatNumber, formatPercent, movementClass } from "../_lib/format";
@@ -123,6 +124,7 @@ export function DigestCard({ digest }: { digest: MarketDigest }) {
               <thead>
                 <tr>
                   <th scope="col">Stock</th>
+                  <th scope="col">30d</th>
                   <th scope="col">Price</th>
                   <th scope="col">Chg</th>
                   <th scope="col">Riel/day</th>
@@ -270,6 +272,7 @@ function BoardRow({ row }: { row: DigestBoardRow }) {
           </span>
         </Link>
       </th>
+      <td className="board-spark"><Sparkline values={row.spark} width={48} height={16} /></td>
       <td>{formatNumber(row.price)}</td>
       <td className={movementClass(row.changePercent)}>{formatPercent(row.changePercent)}</td>
       <td>{formatCompact(row.turnoverKhr)}</td>
@@ -298,6 +301,38 @@ function BoardRow({ row }: { row: DigestBoardRow }) {
 }
 
 function CandidateRow({ candidate }: { candidate: DigestCandidate }) {
+  const { buy, sell } = candidate.tickets;
+
+  // The bar is scaled to today's band, so a level outside it has nowhere to sit
+  // and is simply absent — which is the truth, and needs no sentence.
+  const marks: RangeMark[] = [
+    { price: candidate.price, label: "Last traded", kind: "last" },
+    ...(candidate.levelSide === "support"
+      ? [{ price: candidate.levelPrice, label: candidate.levelLabel, kind: "support" as const }]
+      : [{ price: candidate.levelPrice, label: candidate.levelLabel, kind: "resistance" as const }]),
+    ...(candidate.otherPrice !== null
+      ? [
+          {
+            price: candidate.otherPrice,
+            label: candidate.otherLabel ?? "Other side",
+            kind: candidate.levelSide === "support" ? ("resistance" as const) : ("support" as const),
+          },
+        ]
+      : []),
+    ...(buy?.limitPrice != null ? [{ price: buy.limitPrice, label: "Buy limit", kind: "buy" as const }] : []),
+    ...(sell?.limitPrice != null ? [{ price: sell.limitPrice, label: "Sell limit", kind: "sell" as const }] : []),
+  ];
+
+  // Scaling to the full ±10% band is honest but unreadable: on ACLEDA every
+  // mark falls inside 60 riel of an 1,840-wide band and they pile up in one
+  // spot. Scale to the marks' own span instead, padded, then clamp into the
+  // band so the bar can never imply a price today does not permit.
+  const prices = marks.map((mark) => mark.price);
+  const spread = Math.max(...prices) - Math.min(...prices);
+  const pad = Math.max(spread * 0.35, candidate.price * 0.004);
+  const scaleLow = Math.max(candidate.limitDown, Math.min(...prices) - pad);
+  const scaleHigh = Math.min(candidate.limitUp, Math.max(...prices) + pad);
+
   return (
     <li className="digest-row">
       <Link className="digest-name" href={`/stocks/${candidate.symbol}`}>
@@ -309,48 +344,64 @@ function CandidateRow({ candidate }: { candidate: DigestCandidate }) {
       </Link>
 
       <div className="digest-price">
+        <Sparkline values={candidate.spark} />
         <strong>{formatNumber(candidate.price)}</strong>
         <em className={movementClass(candidate.changePercent)}>
           {formatPercent(candidate.changePercent)}
         </em>
       </div>
 
-      <div className="digest-level" data-side={candidate.levelSide}>
-        <span>
-          {candidate.levelSide === "support" ? "Holding above" : "Capped by"}{" "}
-          {candidate.levelLabel.toLowerCase()}
-        </span>
-        <strong>{formatNumber(candidate.levelPrice)}</strong>
-        {candidate.otherPrice !== null ? (
-          <small>
-            Historical {candidate.otherLabel?.toLowerCase()}: {formatNumber(candidate.otherPrice)}
-          </small>
-        ) : null}
+      <div className="digest-visual">
+        <RangeBar
+          low={scaleLow}
+          high={scaleHigh}
+          marks={marks}
+          caption={`Today's band allows ${formatNumber(candidate.limitDown)}–${formatNumber(candidate.limitUp)}`}
+        />
+        {/* Every caution keeps its full sentence in the tooltip; only the fact
+            that there is one needs to be visible at a glance. */}
+        <div className="digest-chips">
+          <span className="chip" data-tone={candidate.levelSide}>
+            {candidate.levelSide === "support" ? "Above support" : "Under resistance"}
+          </span>
+          {candidate.cautions
+            // The side chip above already says the price is under resistance;
+            // the matching caution would print the same fact twice.
+            .filter((caution) => !/under resistance/i.test(caution))
+            .map((caution) => (
+              <span key={caution} className="chip" data-tone="warn" title={caution}>
+                {shortCaution(caution)}
+              </span>
+            ))}
+          {candidate.reasons.map((reason) => (
+            <span key={reason} className="chip" data-tone="note" title={reason}>
+              {shortReason(reason)}
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className="digest-notes">
-        {candidate.reasons.slice(0, 2).map((reason) => (
-          <p key={reason} className="digest-reason">
-            <SafeText>{reason}</SafeText>
-          </p>
-        ))}
-        {candidate.cautions.map((caution) => (
-          <p key={caution} className="digest-caution-line">
-            <SafeText>{caution}</SafeText>
-          </p>
-        ))}
-        <p className="digest-constraints">
-          Band {formatNumber(candidate.limitDown)}–{formatNumber(candidate.limitUp)} · tick{" "}
-          {candidate.tickSize}
-        </p>
-
-        {/* Nearby scenarios, constrained by observed movement and exchange rules. */}
         <div className="ticket-row">
-          <TicketCell ticket={candidate.tickets.buy} side="buy" />
-          <TicketCell ticket={candidate.tickets.sell} side="sell" />
+          <TicketCell ticket={buy} side="buy" />
+          <TicketCell ticket={sell} side="sell" />
         </div>
       </div>
-      <DecisionReview symbol={candidate.symbol} />
     </li>
   );
+}
+
+/** Compresses a caution to its signal; the sentence stays in the tooltip. */
+function shortCaution(caution: string): string {
+  const rsi = /RSI (\d+)/i.exec(caution);
+  if (rsi) return `RSI ${rsi[1]}`;
+  if (/under resistance/i.test(caution)) return "Break unconfirmed";
+  if (/thin/i.test(caution)) return "Thin";
+  return caution.split(/[,.—]/)[0]!.trim().slice(0, 22);
+}
+
+function shortReason(reason: string): string {
+  const volume = /([\d.]+)x its usual volume/i.exec(reason);
+  if (volume) return `${volume[1]}\u00d7 volume`;
+  return reason.split(/[,.(—]/)[0]!.trim().slice(0, 26);
 }

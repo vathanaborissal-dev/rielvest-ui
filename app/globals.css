@@ -4620,3 +4620,120 @@ td {
 }
 
 .context-sources a { color: var(--ink-soft); }
+
+/* ── Inline visuals that stand in for sentences ──────────────────────────── */
+
+.spark { display: block; overflow: visible; }
+.spark polyline { stroke: var(--ink-faint); }
+.spark circle { fill: var(--ink-faint); }
+.spark[data-rising="true"] polyline { stroke: var(--positive); }
+.spark[data-rising="true"] circle { fill: var(--positive); }
+.spark[data-rising="false"] polyline { stroke: var(--negative); }
+.spark[data-rising="false"] circle { fill: var(--negative); }
+
+.board-spark { width: 48px; padding-right: 0 !important; }
+.board-spark .spark { margin-left: auto; }
+
+/* Where the price sits inside what today's band permits. */
+.range-bar { margin: 0; }
+
+.range-track {
+  position: relative;
+  height: 7px;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--positive) 22%, transparent),
+    var(--surface-muted) 45%,
+    var(--surface-muted) 55%,
+    color-mix(in srgb, var(--negative) 22%, transparent)
+  );
+}
+
+.range-mark {
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 13px;
+  margin-left: -1px;
+  border-radius: 1px;
+  transform: translateY(-50%);
+}
+
+.range-mark[data-kind="support"] { background: var(--positive); }
+.range-mark[data-kind="resistance"] { background: var(--negative); }
+
+/* The last trade reads as a position, not a boundary. */
+.range-mark[data-kind="last"] {
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  background: var(--ink);
+}
+
+.range-mark[data-kind="buy"],
+.range-mark[data-kind="sell"] {
+  width: 0;
+  height: 0;
+  margin-left: -3px;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  background: none;
+}
+
+.range-mark[data-kind="buy"] {
+  top: calc(50% + 8px);
+  border-bottom: 4px solid var(--positive);
+}
+
+.range-mark[data-kind="sell"] {
+  top: calc(50% - 12px);
+  border-top: 4px solid var(--negative);
+}
+
+.range-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  color: var(--ink-faint);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.digest-visual { min-width: 0; }
+
+/* Cautions and reasons, compressed to a signal. The sentence lives in the
+   tooltip, so nothing is lost and nothing has to be read. */
+.digest-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 9px;
+}
+
+.chip {
+  border-radius: 3px;
+  padding: 1px 6px;
+  background: var(--surface-muted);
+  color: var(--ink-faint);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.chip[data-tone="support"] {
+  background: color-mix(in srgb, var(--positive) 15%, transparent);
+  color: var(--positive);
+}
+
+.chip[data-tone="resistance"],
+.chip[data-tone="warn"] {
+  background: color-mix(in srgb, var(--negative) 15%, transparent);
+  color: var(--negative);
+}
+
+.digest-price .spark { margin: 0 0 3px auto; }
