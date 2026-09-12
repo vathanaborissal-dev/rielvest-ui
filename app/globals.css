@@ -4574,11 +4574,34 @@ td {
 
 .context-news a:hover { color: var(--accent-strong); }
 
-.context-news time {
+.context-news-meta {
   flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.context-news-meta em {
+  color: var(--ink-faint);
+  font-size: 10px;
+  font-style: normal;
+}
+
+.context-news time {
   color: var(--ink-faint);
   font-size: 10px;
   font-variant-numeric: tabular-nums;
+}
+
+.context-news-empty {
+  margin: 0;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  color: var(--ink-faint);
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .context-storage {

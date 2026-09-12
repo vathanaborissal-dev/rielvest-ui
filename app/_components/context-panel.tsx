@@ -46,21 +46,32 @@ export function ContextPanel({ context }: { context: MarketContext }) {
           ))}
         </ul>
 
+        <p className="context-label">Cambodian market news</p>
         {context.headlines.length > 0 ? (
           <>
-            <p className="context-label">Cambodian business press</p>
             <ul className="context-news">
               {context.headlines.map((item) => (
                 <li key={item.url}>
                   <a href={item.url} target="_blank" rel="noreferrer noopener">
                     <SafeText>{item.title}</SafeText>
                   </a>
-                  {item.publishedAt ? <time dateTime={item.publishedAt}>{item.publishedAt.slice(0, 10)}</time> : null}
+                  <span className="context-news-meta">
+                    {item.source ? <em>{item.source}</em> : null}
+                    {item.publishedAt ? (
+                      <time dateTime={item.publishedAt}>{item.publishedAt.slice(0, 10)}</time>
+                    ) : null}
+                  </span>
                 </li>
               ))}
             </ul>
           </>
-        ) : null}
+        ) : (
+          /* Naming the reason matters: an empty list would otherwise read as
+             "nothing happened", which is a different claim entirely. */
+          <p className="context-news-empty">
+            <SafeText>{context.headlinesUnavailableReason ?? "No headlines could be read."}</SafeText>
+          </p>
+        )}
 
         <p className="context-storage">
           <SafeText>{context.storage}</SafeText>

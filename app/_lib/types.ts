@@ -646,6 +646,7 @@ export interface LiveHeadline {
   title: string;
   url: string;
   publishedAt: string | null;
+  source: string | null;
 }
 
 export interface MarketContext {
@@ -653,6 +654,7 @@ export interface MarketContext {
   region: LiveQuote[];
   benchmarks: LiveQuote[];
   headlines: LiveHeadline[];
+  headlinesUnavailableReason: string | null;
   summary: string | null;
   sources: Array<{ label: string; url: string; note: string }>;
   storage: string;
