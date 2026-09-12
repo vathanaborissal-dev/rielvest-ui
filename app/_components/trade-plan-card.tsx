@@ -1,4 +1,5 @@
 "use client";
+import { RangeBar, Sparkline, type RangeMark } from "./spark";
 
 import { useState } from "react";
 import { SafeText } from "./data-ui";
@@ -62,6 +63,23 @@ export function TradePlanCard({ plan }: { plan: TradePlan }) {
           </button>
         </div>
       </header>
+
+      {plan.rules ? (
+        <div className="plan-visual">
+          <RangeBar
+            low={planScale(plan).low}
+            high={planScale(plan).high}
+            marks={planMarks(plan)}
+            caption={`Today's band allows ${formatNumber(plan.rules.limitDown)}–${formatNumber(plan.rules.limitUp)}`}
+          />
+          {plan.tickets ? (
+            <div className="ticket-row">
+              <PlanTicket ticket={plan.tickets.buy} side="buy" />
+              <PlanTicket ticket={plan.tickets.sell} side="sell" />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <ol className="plan-ladder">
         {ladder.slice(0, splitAt).map((zone) => (
@@ -134,15 +152,102 @@ export function TradePlanCard({ plan }: { plan: TradePlan }) {
   );
 }
 
+/** Marks for the bar: the last trade, each reachable zone, and both limits. */
+function planMarks(plan: TradePlan): RangeMark[] {
+  const marks: RangeMark[] = [];
+  if (plan.lastPrice !== null) {
+    marks.push({ price: plan.lastPrice, label: "Last traded", kind: "last" });
+  }
+  for (const zone of plan.zones) {
+    if (zone.reachableToday === false) continue;
+    marks.push({
+      price: zone.from,
+      label: zone.label,
+      kind: zone.tone === "resistance" ? "resistance" : "support",
+    });
+  }
+  if (plan.tickets?.buy?.limitPrice != null) {
+    marks.push({ price: plan.tickets.buy.limitPrice, label: "Buy limit", kind: "buy" });
+  }
+  if (plan.tickets?.sell?.limitPrice != null) {
+    marks.push({ price: plan.tickets.sell.limitPrice, label: "Sell limit", kind: "sell" });
+  }
+  return marks;
+}
+
+/**
+ * Scale to the marks, padded, then clamped into the band.
+ *
+ * Same reasoning as the briefing: the full ±10% band is honest but unreadable
+ * when every mark falls inside a fraction of it, and clamping means a price
+ * today cannot reach has nowhere to sit.
+ */
+function planScale(plan: TradePlan): { low: number; high: number } {
+  const prices = planMarks(plan).map((mark) => mark.price);
+  const floor = plan.rules?.limitDown ?? Math.min(...prices);
+  const ceiling = plan.rules?.limitUp ?? Math.max(...prices);
+  if (prices.length === 0) return { low: floor, high: ceiling };
+
+  const spread = Math.max(...prices) - Math.min(...prices);
+  const pad = Math.max(spread * 0.35, (plan.lastPrice ?? Math.max(...prices)) * 0.004);
+  return {
+    low: Math.max(floor, Math.min(...prices) - pad),
+    high: Math.min(ceiling, Math.max(...prices) + pad),
+  };
+}
+
+function PlanTicket({
+  ticket,
+  side,
+}: {
+  ticket: NonNullable<TradePlan["tickets"]>["buy"];
+  side: "buy" | "sell";
+}) {
+  if (!ticket || ticket.limitPrice === null) {
+    return (
+      <div className="ticket" data-side={side} data-reachable="false">
+        <span className="ticket-side">{side === "buy" ? "Buy reference" : "Sell reference"}</span>
+        <strong>No nearby reference</strong>
+        <small>Recent movement does not reach a tested level on this side.</small>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ticket" data-side={side} data-reachable="true">
+      <span className="ticket-side">{side === "buy" ? "Buy limit" : "Sell limit"}</span>
+      <strong>{formatNumber(ticket.limitPrice)}</strong>
+      <small>
+        {ticket.label.toLowerCase()}
+        {ticket.shares !== null ? ` · ${formatCompact(ticket.shares)} sh` : ""}
+        {ticket.settlesOn ? ` · settles ${ticket.settlesOn}` : ""}
+      </small>
+    </div>
+  );
+}
+
 function PlanRow({ zone, verbose }: { zone: TradePlan["zones"][number]; verbose: boolean }) {
   return (
-    <li className="plan-row" data-tone={zone.tone}>
+    <li
+      className="plan-row"
+      data-tone={zone.tone}
+      data-unreachable={zone.reachableToday === false}
+    >
       <span className="plan-price">
         {formatNumber(zone.from)}
         {zone.to ? <em>– {formatNumber(zone.to)}</em> : null}
       </span>
       <span className="plan-body">
-        <strong>{zone.label}</strong>
+        <strong>
+          {zone.label}
+          {/* Today's band cannot reach this price, so no order can rest there —
+              said once, beside the number it disqualifies. */}
+          {zone.reachableToday === false ? (
+            <span className="plan-outofband" title="Outside today's ±10% band — the price cannot get here in one session">
+              out of band
+            </span>
+          ) : null}
+        </strong>
         {verbose ? (
           <>
             <span>

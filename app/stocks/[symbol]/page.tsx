@@ -1,4 +1,5 @@
 import { DecisionReview } from "../../_components/decision-review";
+import { Sparkline } from "../../_components/spark";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "../../_components/app-shell";
@@ -6,7 +7,14 @@ import { AssessmentTag, DataNotice, SafeText, SourceFooter } from "../../_compon
 import { StockPriceChart } from "../../_components/stock-price-chart";
 import { StockAvatar } from "../../_components/stock-avatar";
 import { TradePlanCard } from "../../_components/trade-plan-card";
-import { getAnalysis, getCompany, getPriceChart, getQuickRead, getTradePlan } from "../../_lib/api";
+import {
+  getAnalysis,
+  getCompany,
+  getDecisionReview,
+  getPriceChart,
+  getQuickRead,
+  getTradePlan,
+} from "../../_lib/api";
 import {
   cleanCopy,
   formatCompact,
@@ -22,13 +30,14 @@ import type { AnalysisFinding, StockAnalysis } from "../../_lib/types";
 export default async function CompanyPage({ params }: PageProps<"/stocks/[symbol]">) {
   const { symbol: rawSymbol } = await params;
   const symbol = rawSymbol.toUpperCase();
-  const [companyResult, analysisResult, chartResult, quickReadResult, planResult] =
+  const [companyResult, analysisResult, chartResult, quickReadResult, planResult, reviewResult] =
     await Promise.all([
       getCompany(symbol),
       getAnalysis(symbol),
       getPriceChart(symbol, "1d", "1y"),
       getQuickRead(symbol),
       getTradePlan(symbol),
+      getDecisionReview(symbol),
     ]);
 
   if (companyResult.status === 404) notFound();
@@ -83,6 +92,7 @@ export default async function CompanyPage({ params }: PageProps<"/stocks/[symbol
               </div>
             </div>
             <div className="company-price">
+              <Sparkline values={planResult.data?.spark} width={78} height={24} />
               <span>Latest recorded price</span>
               <strong>{formatKhr(latest?.close)}</strong>
               <small data-movement={movementClass(changePercent)}>{formatPercent(changePercent)}</small>
@@ -136,7 +146,7 @@ export default async function CompanyPage({ params }: PageProps<"/stocks/[symbol
             </aside>
           </section>
 
-          <DecisionReview symbol={bundle.company.symbol} />
+          {reviewResult.data?.review ? <DecisionReview review={reviewResult.data.review} /> : null}
           <AnalysisSection analysis={analysis} error={analysisResult.error} />
 
           <section className="dividend-panel">

@@ -14,6 +14,7 @@ import type {
   ChartInterval,
   ChartRange,
   MarketContext,
+  DecisionReview,
 } from "./types";
 
 const API_BASE = (process.env.RIELVEST_API_URL ?? "http://localhost:4000/api").replace(/\/$/, "");
@@ -142,6 +143,20 @@ export function getDigest() {
  */
 export function getMarketContext() {
   return getJson<MarketContext>("/market/context", 120);
+}
+
+/**
+ * The research checklist for one company.
+ *
+ * Fetched on the server with the rest of the page so the verdict is visible
+ * without a click or a spinner; it reads stored analysis only, so this never
+ * triggers a model request.
+ */
+export function getDecisionReview(symbol: string) {
+  return getJson<{ review: DecisionReview }>(
+    `/companies/${encodeURIComponent(symbol)}/decision-review`,
+    REVALIDATE.analysis,
+  );
 }
 
 /** The pre-session brief: what needs a decision before the bell. */

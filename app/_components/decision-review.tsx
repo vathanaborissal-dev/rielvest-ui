@@ -1,88 +1,129 @@
-"use client";
-
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import { AssessmentTag, SafeText } from "./data-ui";
 import { formatDate } from "../_lib/format";
 import type { DecisionReview as Review } from "../_lib/types";
 
-const API_BASE = (process.env.NEXT_PUBLIC_RIELVEST_API_URL ?? "http://localhost:4000/api").replace(/\/$/, "");
-
-/** Fetch only when requested; no model calls or extra dashboard cards. */
-export function DecisionReview({ symbol }: { symbol: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <details className="decision-review" onToggle={(event) => setOpen(event.currentTarget.open)}>
-      <summary>Before you consider buying</summary>
-      {open ? <ReviewContent key={symbol} symbol={symbol} /> : null}
-    </details>
-  );
-}
-
-function ReviewContent({ symbol }: { symbol: string }) {
-  const [review, setReview] = useState<Review | null>(null);
-  const [error, setError] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 12_000);
-    let active = true;
-    fetch(`${API_BASE}/companies/${encodeURIComponent(symbol)}/decision-review`, { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Review unavailable");
-        const body = await response.json() as { review: Review };
-        if (!body.review || body.review.symbol !== symbol) throw new Error("Invalid review");
-        if (active) setReview(body.review);
-      })
-      .catch(() => { if (active) setError(true); })
-      .finally(() => window.clearTimeout(timer));
-    return () => { active = false; window.clearTimeout(timer); controller.abort(); };
-  }, [symbol, attempt]);
-
-  if (error) return (
-    <div role="alert" className="review-body">
-      <p>The decision review is temporarily unavailable.</p>
-      <button type="button" className="text-button" onClick={() => { setError(false); setAttempt((value) => value + 1); }}>Try again</button>
-    </div>
-  );
-  if (!review) return <p role="status" className="review-body">Checking company figures and trading conditions…</p>;
+/**
+ * The verdict, then the reasoning.
+ *
+ * This used to fetch on the client when opened, so the conclusion sat behind a
+ * click and a spinner — on a page nobody reads carefully, that is the same as
+ * not being there. The page already loads the analysis and the plan on the
+ * server, so the review comes with them: stance, headline and a scored bar per
+ * category are visible immediately, and only the sentences are collapsed.
+ *
+ * It reads stored analysis, so rendering it eagerly never triggers a model
+ * request.
+ */
+export function DecisionReview({ review }: { review?: Review | null }) {
+  // Defensive for the same reason the sparkline is: this renders on the server
+  // against a payload that can lag a deploy, and a missing field must cost a
+  // card, never the page.
+  const factors = Array.isArray(review?.factors) ? review.factors : [];
+  if (!review || factors.length === 0) return null;
+  const scored = factors.filter((factor) => factor.score !== null);
 
   return (
-    <div className="review-body">
-      <div className="review-heading">
-        <strong>{review.headline}</strong>
-        <span>{formatDate(review.asOf)} · {review.factors.filter((factor) => factor.score !== null).length}/{review.factors.length} categories scored</span>
+    <section className="decision-review" data-stance={review.stance}>
+      <div className="review-verdict">
+        <span className="review-stance">{stanceLabel(review.stance)}</span>
+        <strong>
+          <SafeText>{review.headline}</SafeText>
+        </strong>
+        <span className="review-asof">
+          {formatDate(review.asOf)} · {scored.length}/{factors.length} scored
+        </span>
       </div>
-      <div className="review-balance">
-        <div>
-          <h4>What supports it</h4>
-          {review.strengths.length ? review.strengths.map((line) => <p key={line}><SafeText>{line}</SafeText></p>) : <p>No clear positive finding in the available data.</p>}
+
+      {/* Six bars say which parts of the business hold up and which do not,
+          in the time it takes to read none of the sentences below. */}
+      <ul className="factor-bars">
+        {factors.map((factor) => (
+          <li key={factor.label} data-assessment={factor.assessment} title={`${factor.label}: ${factor.assessment.replace(/_/g, " ")}`}>
+            <span className="factor-label">{factor.label}</span>
+            <span className="factor-track">
+              <span
+                className="factor-fill"
+                style={{ width: `${Math.max(3, Math.min(100, factor.score ?? 0))}%` }}
+              />
+            </span>
+            <span className="factor-score">{factor.score === null ? "—" : factor.score}</span>
+          </li>
+        ))}
+      </ul>
+
+      <details className="review-detail">
+        <summary>Why, and what to check next</summary>
+        <div className="review-body">
+          <div className="review-balance">
+            <div>
+              <h4>What supports it</h4>
+              {review.strengths?.length ? (
+                review.strengths!.map((line) => (
+                  <p key={line}>
+                    <SafeText>{line}</SafeText>
+                  </p>
+                ))
+              ) : (
+                <p>No clear positive finding in the available data.</p>
+              )}
+            </div>
+            <div>
+              <h4>Reasons to wait</h4>
+              {review.cautions?.length ? (
+                review.cautions!.map((line) => (
+                  <p key={line}>
+                    <SafeText>{line}</SafeText>
+                  </p>
+                ))
+              ) : (
+                <p>No caution was raised by the current data.</p>
+              )}
+            </div>
+          </div>
+
+          <p className="review-next">
+            <strong>Next check:</strong> <SafeText>{review.nextCheck}</SafeText>
+          </p>
+
+          {review.gaps?.length ? (
+            <p className="review-gaps">
+              <SafeText>{review.gaps!.join(" ")}</SafeText>
+            </p>
+          ) : null}
+
+          {review.news?.length ? (
+            <ul className="review-news">
+              {review.news!.map((item) => (
+                <li key={`${item.date}-${item.title}`}>
+                  {item.url ? (
+                    <a href={item.url} target="_blank" rel="noreferrer noopener">
+                      <SafeText>{item.title}</SafeText>
+                    </a>
+                  ) : (
+                    <SafeText>{item.title}</SafeText>
+                  )}
+                  <time dateTime={item.date}>{item.date}</time>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <p className="review-source">
+            {review.summary?.source === "model"
+              ? `Wording assisted by ${review.summary?.model ?? "a model"}; every figure is checked against the computed analysis.`
+              : "Wording from the analysis engine."}{" "}
+            A checklist for further research, never a trade instruction.
+          </p>
         </div>
-        <div>
-          <h4>Reasons to wait</h4>
-          {review.cautions.length ? review.cautions.map((line) => <p key={line}><SafeText>{line}</SafeText></p>) : <p>No major caution was detected. Missing data can still hide risks.</p>}
-        </div>
-      </div>
-      <p className="review-next"><strong>Next check:</strong> <SafeText>{review.nextCheck}</SafeText></p>
-      <details className="review-evidence">
-        <summary>Factors, filings and explanation</summary>
-        <dl className="review-factors">
-          {review.factors.map((factor) => <div key={factor.label}><dt>{factor.label}</dt><dd><AssessmentTag value={factor.assessment} /></dd></div>)}
-        </dl>
-        {review.summary.lines.length > 0 ? <>
-          <h4>{review.summary.source === "model" ? "Gemini explanation" : "Data-based explanation"}</h4>
-          <p className="review-meta">{review.summary.source === "model" ? `AI-generated from recorded data · ${review.summary.model ?? "Gemini"}. Verify against the factors and filings.` : "Generated by RielVest’s analysis rules."}</p>
-          {review.summary.lines.map((line, index) => <p key={index}><SafeText>{line}</SafeText></p>)}
-        </> : null}
-        {review.news.length ? <><h4>Latest filings</h4>{review.news.map((item) => <p key={`${item.date}-${item.title}`}>
-          <span>{formatDate(item.date)} · </span>
-          {item.url ? <a href={item.url} target="_blank" rel="noreferrer noopener"><SafeText>{item.title}</SafeText></a> : <SafeText>{item.title}</SafeText>}
-        </p>)}</> : null}
-        {review.gaps.length ? <><h4>Still unknown</h4>{review.gaps.map((gap) => <p key={gap}><SafeText>{gap}</SafeText></p>)}</> : null}
-        <p>Coverage counts scored categories; it is not the chance of making a profit. This review does not account for your holdings, time horizon or risk tolerance.</p>
-        <Link href={`/stocks/${symbol}`}>Open full company analysis</Link>
       </details>
-    </div>
+    </section>
   );
 }
+
+function stanceLabel(stance: Review["stance"]): string {
+  if (stance === "research") return "Worth researching";
+  if (stance === "wait") return "Wait";
+  return "Not enough data";
+}
+
+export { AssessmentTag };

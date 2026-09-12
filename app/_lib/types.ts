@@ -451,12 +451,16 @@ export interface PlanZone {
   meaning: string;
   basis: string;
   tone: "support" | "resistance" | "invalidation" | "neutral";
+  /** False when today's ±10% band cannot reach this zone at all. */
+  reachableToday?: boolean;
 }
 
 export interface TradePlan {
   symbol: string;
   asOf: string | null;
   lastPrice: number | null;
+  spark?: number[];
+  tickets?: { buy: OrderTicket | null; sell: OrderTicket | null };
   dailyRange: { khr: number; percent: number } | null;
   zones: PlanZone[];
   rules: {
