@@ -513,7 +513,7 @@ export interface DigestSession {
 
 export interface DigestCandidate {
   symbol: string;
-  spark: number[];
+  spark?: number[];
   name: string;
   price: number;
   changePercent: number | null;
@@ -580,7 +580,7 @@ export interface DigestNewsItem {
 
 export interface DigestBoardRow {
   symbol: string;
-  spark: number[];
+  spark?: number[];
   name: string;
   price: number;
   changePercent: number | null;

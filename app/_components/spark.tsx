@@ -15,11 +15,15 @@ export function Sparkline({
   width = 62,
   height = 20,
 }: {
-  values: number[];
+  values?: number[] | null;
   width?: number;
   height?: number;
 }) {
-  const points = values.filter((value) => Number.isFinite(value));
+  // Defensive on purpose. This renders during SSR, and a cached payload from
+  // before the field existed once took the whole briefing page down with
+  // "Cannot read properties of undefined". A decoration must never be able to
+  // do that — absent data means no sparkline, not no page.
+  const points = Array.isArray(values) ? values.filter((value) => Number.isFinite(value)) : [];
   if (points.length < 2) return null;
 
   const min = Math.min(...points);
@@ -81,7 +85,9 @@ export function RangeBar({
   if (!Number.isFinite(span) || span <= 0) return null;
 
   const position = (price: number) => ((price - low) / span) * 100;
-  const inside = marks.filter((mark) => mark.price >= low && mark.price <= high);
+  const inside = (Array.isArray(marks) ? marks : []).filter(
+    (mark) => Number.isFinite(mark?.price) && mark.price >= low && mark.price <= high,
+  );
 
   return (
     <div className="range-bar" title={caption}>
